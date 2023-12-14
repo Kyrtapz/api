@@ -28614,6 +28614,49 @@
         }
       }
     },
+    "com.github.openshift.api.operator.v1.NetworkDiagnostics": {
+      "description": "NetworkDiagnostics describes network diagnostics configuration",
+      "type": "object",
+      "properties": {
+        "mode": {
+          "description": "Mode controls the network diagnostics mode\n\nBy default the value is set to All.",
+          "type": "string",
+          "default": ""
+        },
+        "sourceDeploymentNodePlacement": {
+          "description": "sourceDeploymentNodePlacement controls the scheduling of network diagnostics source deployment\n\nSee NetworkDiagnosticsNodePlacement for more details.",
+          "default": {},
+          "$ref": "#/definitions/com.github.openshift.api.operator.v1.NetworkDiagnosticsNodePlacement"
+        },
+        "targetDaemonsetNodePlacement": {
+          "description": "targetDaemonsetNodePlacement controls the scheduling of network diagnostics target daemonset\n\nSee NetworkDiagnosticsNodePlacement for more details.",
+          "default": {},
+          "$ref": "#/definitions/com.github.openshift.api.operator.v1.NetworkDiagnosticsNodePlacement"
+        }
+      }
+    },
+    "com.github.openshift.api.operator.v1.NetworkDiagnosticsNodePlacement": {
+      "description": "NetworkDiagnosticsNodePlacement describes node scheduling configuration network diagnostics components",
+      "type": "object",
+      "properties": {
+        "nodeSelector": {
+          "description": "nodeSelector is the node selector applied to network diagnostics components\n\nBy default this is set to `kubernetes.io/os: linux`",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "tolerations": {
+          "description": "tolerations is a list of tolerations applied to network diagnostics components\n\nFor SourceDeploymentNodePlacement, this is set to an empty list by default.\n\nFor TargetDaemonsetNodePlacement, this is set to `- operator: \"Exists\"` by default. It means that it tolerates all taints.\n\nSee https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/",
+          "type": "array",
+          "items": {
+            "default": {},
+            "$ref": "#/definitions/io.k8s.api.core.v1.Toleration"
+          }
+        }
+      }
+    },
     "com.github.openshift.api.operator.v1.NetworkList": {
       "description": "NetworkList contains a list of Network configurations\n\nCompatibility level 1: Stable within a major release for a minimum of 12 months or 3 minor releases (whichever is longer).",
       "type": "object",
@@ -28730,6 +28773,10 @@
         "migration": {
           "description": "migration enables and configures the cluster network migration. The migration procedure allows to change the network type and the MTU.",
           "$ref": "#/definitions/com.github.openshift.api.operator.v1.NetworkMigration"
+        },
+        "networkDiagnostics": {
+          "default": {},
+          "$ref": "#/definitions/com.github.openshift.api.operator.v1.NetworkDiagnostics"
         },
         "observedConfig": {
           "description": "observedConfig holds a sparse config that controller has observed from the cluster state.  It exists in spec because it is an input to the level for the operator",

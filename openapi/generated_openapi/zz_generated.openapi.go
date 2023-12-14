@@ -964,6 +964,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/operator/v1.MyOperatorResourceStatus":                                      schema_openshift_api_operator_v1_MyOperatorResourceStatus(ref),
 		"github.com/openshift/api/operator/v1.NetFlowConfig":                                                 schema_openshift_api_operator_v1_NetFlowConfig(ref),
 		"github.com/openshift/api/operator/v1.Network":                                                       schema_openshift_api_operator_v1_Network(ref),
+		"github.com/openshift/api/operator/v1.NetworkDiagnostics":                                            schema_openshift_api_operator_v1_NetworkDiagnostics(ref),
+		"github.com/openshift/api/operator/v1.NetworkDiagnosticsNodePlacement":                               schema_openshift_api_operator_v1_NetworkDiagnosticsNodePlacement(ref),
 		"github.com/openshift/api/operator/v1.NetworkList":                                                   schema_openshift_api_operator_v1_NetworkList(ref),
 		"github.com/openshift/api/operator/v1.NetworkMigration":                                              schema_openshift_api_operator_v1_NetworkMigration(ref),
 		"github.com/openshift/api/operator/v1.NetworkSpec":                                                   schema_openshift_api_operator_v1_NetworkSpec(ref),
@@ -48848,6 +48850,88 @@ func schema_openshift_api_operator_v1_Network(ref common.ReferenceCallback) comm
 	}
 }
 
+func schema_openshift_api_operator_v1_NetworkDiagnostics(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "NetworkDiagnostics describes network diagnostics configuration",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"mode": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Mode controls the network diagnostics mode\n\nBy default the value is set to All.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"sourceDeploymentNodePlacement": {
+						SchemaProps: spec.SchemaProps{
+							Description: "sourceDeploymentNodePlacement controls the scheduling of network diagnostics source deployment\n\nSee NetworkDiagnosticsNodePlacement for more details.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/operator/v1.NetworkDiagnosticsNodePlacement"),
+						},
+					},
+					"targetDaemonsetNodePlacement": {
+						SchemaProps: spec.SchemaProps{
+							Description: "targetDaemonsetNodePlacement controls the scheduling of network diagnostics target daemonset\n\nSee NetworkDiagnosticsNodePlacement for more details.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/operator/v1.NetworkDiagnosticsNodePlacement"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/operator/v1.NetworkDiagnosticsNodePlacement"},
+	}
+}
+
+func schema_openshift_api_operator_v1_NetworkDiagnosticsNodePlacement(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "NetworkDiagnosticsNodePlacement describes node scheduling configuration network diagnostics components",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"nodeSelector": {
+						SchemaProps: spec.SchemaProps{
+							Description: "nodeSelector is the node selector applied to network diagnostics components\n\nBy default this is set to `kubernetes.io/os: linux`",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"tolerations": {
+						SchemaProps: spec.SchemaProps{
+							Description: "tolerations is a list of tolerations applied to network diagnostics components\n\nFor SourceDeploymentNodePlacement, this is set to an empty list by default.\n\nFor TargetDaemonsetNodePlacement, this is set to `- operator: \"Exists\"` by default. It means that it tolerates all taints.\n\nSee https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.Toleration"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.Toleration"},
+	}
+}
+
 func schema_openshift_api_operator_v1_NetworkList(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -49062,6 +49146,12 @@ func schema_openshift_api_operator_v1_NetworkSpec(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
+					"networkDiagnostics": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/openshift/api/operator/v1.NetworkDiagnostics"),
+						},
+					},
 					"kubeProxyConfig": {
 						SchemaProps: spec.SchemaProps{
 							Description: "kubeProxyConfig lets us configure desired proxy configuration. If not specified, sensible defaults will be chosen by OpenShift directly. Not consumed by all network providers - currently only openshift-sdn.",
@@ -49085,7 +49175,7 @@ func schema_openshift_api_operator_v1_NetworkSpec(ref common.ReferenceCallback) 
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/operator/v1.AdditionalNetworkDefinition", "github.com/openshift/api/operator/v1.ClusterNetworkEntry", "github.com/openshift/api/operator/v1.DefaultNetworkDefinition", "github.com/openshift/api/operator/v1.ExportNetworkFlows", "github.com/openshift/api/operator/v1.NetworkMigration", "github.com/openshift/api/operator/v1.ProxyConfig", "k8s.io/apimachinery/pkg/runtime.RawExtension"},
+			"github.com/openshift/api/operator/v1.AdditionalNetworkDefinition", "github.com/openshift/api/operator/v1.ClusterNetworkEntry", "github.com/openshift/api/operator/v1.DefaultNetworkDefinition", "github.com/openshift/api/operator/v1.ExportNetworkFlows", "github.com/openshift/api/operator/v1.NetworkDiagnostics", "github.com/openshift/api/operator/v1.NetworkMigration", "github.com/openshift/api/operator/v1.ProxyConfig", "k8s.io/apimachinery/pkg/runtime.RawExtension"},
 	}
 }
 

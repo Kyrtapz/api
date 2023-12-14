@@ -1429,6 +1429,27 @@ func (Network) SwaggerDoc() map[string]string {
 	return map_Network
 }
 
+var map_NetworkDiagnostics = map[string]string{
+	"":                              "NetworkDiagnostics describes network diagnostics configuration",
+	"mode":                          "Mode controls the network diagnostics mode\n\nBy default the value is set to All.",
+	"sourceDeploymentNodePlacement": "sourceDeploymentNodePlacement controls the scheduling of network diagnostics source deployment\n\nSee NetworkDiagnosticsNodePlacement for more details.",
+	"targetDaemonsetNodePlacement":  "targetDaemonsetNodePlacement controls the scheduling of network diagnostics target daemonset\n\nSee NetworkDiagnosticsNodePlacement for more details.",
+}
+
+func (NetworkDiagnostics) SwaggerDoc() map[string]string {
+	return map_NetworkDiagnostics
+}
+
+var map_NetworkDiagnosticsNodePlacement = map[string]string{
+	"":             "NetworkDiagnosticsNodePlacement describes node scheduling configuration network diagnostics components",
+	"nodeSelector": "nodeSelector is the node selector applied to network diagnostics components\n\nBy default this is set to `kubernetes.io/os: linux`",
+	"tolerations":  "tolerations is a list of tolerations applied to network diagnostics components\n\nFor SourceDeploymentNodePlacement, this is set to an empty list by default.\n\nFor TargetDaemonsetNodePlacement, this is set to `- operator: \"Exists\"` by default. It means that it tolerates all taints.\n\nSee https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/",
+}
+
+func (NetworkDiagnosticsNodePlacement) SwaggerDoc() map[string]string {
+	return map_NetworkDiagnosticsNodePlacement
+}
+
 var map_NetworkList = map[string]string{
 	"":         "NetworkList contains a list of Network configurations\n\nCompatibility level 1: Stable within a major release for a minimum of 12 months or 3 minor releases (whichever is longer).",
 	"metadata": "metadata is the standard list's metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata",

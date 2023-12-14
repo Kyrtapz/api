@@ -1,6 +1,7 @@
 package v1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -99,6 +100,8 @@ type NetworkSpec struct {
 	// +kubebuilder:default:=false
 	DisableNetworkDiagnostics bool `json:"disableNetworkDiagnostics"`
 
+	// +optional
+	NetworkDiagnostics NetworkDiagnostics `json:"networkDiagnostics"`
 	// kubeProxyConfig lets us configure desired proxy configuration.
 	// If not specified, sensible defaults will be chosen by OpenShift directly.
 	// Not consumed by all network providers - currently only openshift-sdn.
@@ -633,6 +636,64 @@ type EgressIPConfig struct {
 	// +kubebuilder:validation:Maximum=60
 	// +optional
 	ReachabilityTotalTimeoutSeconds *uint32 `json:"reachabilityTotalTimeoutSeconds,omitempty"`
+}
+
+// NetworkDiagnosticsMode is an enumeration of the possible mode of the network diagnostics
+// Valid values are "All", "None".
+// +kubebuilder:validation:Enum:=All;None
+type NetworkDiagnosticsMode string
+
+const (
+	// TODO: `All` seems like a better name as it conveys that all the checks a ran
+	// There is a potential to add something like "basic" that would mean we do nto deploy target/source pods
+	NetworkDiagnosticsEnabled  NetworkDiagnosticsMode = "All"
+	NetworkDiagnosticsDisabled NetworkDiagnosticsMode = "None"
+)
+
+// NetworkDiagnostics describes network diagnostics configuration
+type NetworkDiagnostics struct {
+	// Mode controls the network diagnostics mode
+	//
+	// By default the value is set to All.
+	//
+	// +optional
+	// +kubebuilder:default:=All
+	Mode NetworkDiagnosticsMode `json:"mode"`
+	// sourceDeploymentNodePlacement controls the scheduling of network diagnostics source deployment
+	//
+	// See NetworkDiagnosticsNodePlacement for more details.
+	//
+	// +optional
+	SourceDeploymentNodePlacement NetworkDiagnosticsNodePlacement `json:"sourceDeploymentNodePlacement"`
+
+	// targetDaemonsetNodePlacement controls the scheduling of network diagnostics target daemonset
+	//
+	// See NetworkDiagnosticsNodePlacement for more details.
+	//
+	// +optional
+	TargetDaemonsetNodePlacement NetworkDiagnosticsNodePlacement `json:"targetDaemonsetNodePlacement"`
+}
+
+// NetworkDiagnosticsNodePlacement describes node scheduling configuration network diagnostics components
+type NetworkDiagnosticsNodePlacement struct {
+	// nodeSelector is the node selector applied to network diagnostics components
+	//
+	// By default this is set to `kubernetes.io/os: linux`
+	//
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector"`
+
+	// tolerations is a list of tolerations applied to network diagnostics components
+	//
+	// For SourceDeploymentNodePlacement, this is set to an empty list by default.
+	//
+	// For TargetDaemonsetNodePlacement, this is set to `- operator: "Exists"` by default.
+	// It means that it tolerates all taints.
+	//
+	// See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+	//
+	// +optional
+	Tolerations []corev1.Toleration `json:"tolerations"`
 }
 
 const (
